@@ -1,0 +1,866 @@
+# Movie Recommendation System with HTML & CSS
+
+Here's a complete movie recommendation system built with HTML and CSS. This responsive web interface displays personalized movie recommendations with filtering options.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieReel - Personalized Recommendations</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #0f1623;
+            color: #e6e6e6;
+            line-height: 1.6;
+        }
+        
+        /* Layout */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background-color: #1a2233;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #e50914;
+        }
+        
+        .logo span {
+            color: #ffffff;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 25px;
+        }
+        
+        nav ul li a {
+            color: #e6e6e6;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+        
+        nav ul li a:hover {
+            color: #e50914;
+        }
+        
+        .user-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-box {
+            position: relative;
+            margin-right: 20px;
+        }
+        
+        .search-box input {
+            padding: 8px 15px 8px 35px;
+            border-radius: 20px;
+            border: none;
+            background-color: #2d3748;
+            color: #e6e6e6;
+            width: 200px;
+            font-size: 14px;
+        }
+        
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 12px;
+            top: 8px;
+            font-size: 14px;
+        }
+        
+        .profile {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e50914;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 600px;
+            position: relative;
+            margin-bottom: 50px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1536440136628-6b605c6429db?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.6;
+            z-index: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 50px;
+            color: white;
+        }
+        
+        .hero-title {
+            font-size: 48px;
+            margin-bottom: 15px;
+            max-width: 600px;
+        }
+        
+        .hero-subtitle {
+            font-size: 18px;
+            margin-bottom: 30px;
+            max-width: 600px;
+            color: #cccccc;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: #e50914;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            width: fit-content;
+            transition: background-color 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background-color: #f40612;
+        }
+        
+        /* Main Content */
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        /* Movie Categories */
+        .categories {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scrollbar-width: thin;
+        }
+        
+        .category {
+            min-width: 120px;
+            padding: 10px 15px;
+            background-color: #2d3748;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .category:hover, .category.active {
+            background-color: #e50914;
+        }
+        
+        /* Movie Grid */
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .movie-card {
+            background-color: #1a2233;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+        
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        
+        .movie-info {
+            padding: 15px;
+        }
+        
+        .movie-title {
+            font-size: 16px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .movie-year {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .movie-rating {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .rating-star {
+            color: #fcd34d;
+            margin-right: 5px;
+        }
+        
+        /* Recommendation Banner */
+        .recommendation-banner {
+            background-color: #2d3748;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .recommendation-poster {
+            width: 150px;
+            height: 220px;
+            border-radius: 6px;
+            margin-right: 25px;
+            object-fit: cover;
+        }
+        
+        .recommendation-info {
+            flex: 1;
+        }
+        
+        .recommendation-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .recommendation-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            color: #999;
+        }
+        
+        .recommendation-desc {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .recommendation-reasons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .reason-tag {
+            background-color: #e50914;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        /* User Preferences */
+        .user-preferences {
+            background-color: #1a2233;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .preferences-title {
+            margin-bottom: 20px;
+        }
+        
+        .preferences-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+        }
+        
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #374151;
+            background-color: #2d3748;
+            color: #e6e6e6;
+        }
+        
+        .update-btn {
+            background-color: #e50914;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            width: fit-content;
+        }
+        
+        .update-btn:hover {
+            background-color: #f40612;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #1a2233;
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 1px solid #374151;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .footer-links a {
+            color: #999;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #e50914;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .hero {
+                height: 500px;
+            }
+            
+            .hero-content {
+                padding: 0 30px;
+            }
+            
+            .hero-title {
+                font-size: 36px;
+            }
+            
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+            
+            .recommendation-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .recommendation-poster {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 15px;
+                justify-content: center;
+            }
+            
+            nav ul li {
+                margin: 0 10px;
+            }
+            
+            .search-box {
+                margin: 15px 0 0 0;
+                order: 3;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+            
+            .hero {
+                height: 400px;
+            }
+            
+            .hero-content {
+                padding: 0 20px;
+            }
+            
+            .hero-title {
+                font-size: 28px;
+            }
+            
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .hero {
+                height: 350px;
+            }
+            
+            .hero-content {
+                padding: 0 15px;
+            }
+            
+            .hero-title {
+                font-size: 24px;
+            }
+            
+            .hero-subtitle {
+                font-size: 16px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+            
+            .movie-poster {
+                height: 240px;
+            }
+            
+            .recommendation-banner {
+                padding: 20px;
+            }
+            
+            .recommendation-poster {
+                width: 120px;
+                height: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">Movie<span>Reel</span></div>
+            <nav>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Movies</a></li>
+                    <li><a href="#">TV Shows</a></li>
+                    <li><a href="#">My List</a></li>
+                </ul>
+            </nav>
+            <div class="user-actions">
+                <div class="search-box">
+                    <input type="text" placeholder="Search movies...">
+                </div>
+                <div class="profile">U</div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-bg"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">Personalized Recommendations Just for You</h1>
+                <p class="hero-subtitle">Discover movies you'll love based on your viewing history and preferences. Our algorithm finds the perfect matches.</p>
+                <a href="#" class="cta-button">Start Exploring</a>
+            </div>
+        </section>
+        
+        <!-- Recommendation Banner -->
+        <section class="recommendation-banner">
+            <img src="https://images.unsplash.com/photo-1536440136628-6b605c6429db?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Featured Movie" class="recommendation-poster">
+            <div class="recommendation-info">
+                <h2 class="recommendation-title">The Midnight Voyage</h2>
+                <div class="recommendation-meta">
+                    <span>2023</span>
+                    <span>2h 24min</span>
+                    <span>Action, Adventure, Fantasy</span>
+                    <span>⭐ 8.7/10</span>
+                </div>
+                <p class="recommendation-desc">A mysterious sailor discovers a hidden island where time stands still, forcing him to confront his past and decide the fate of the world. An epic journey of self-discovery and adventure.</p>
+                <div class="recommendation-reasons">
+                    <div class="reason-tag">Based on your love of adventure films</div>
+                    <div class="reason-tag">Features your favorite actor</div>
+                    <div class="reason-tag">Highly rated by similar users</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- User Preferences -->
+        <section class="user-preferences">
+            <h2 class="preferences-title">Update Your Preferences</h2>
+            <form class="preferences-form">
+                <div class="form-group">
+                    <label for="favorite-genres">Favorite Genres</label>
+                    <select id="favorite-genres" multiple>
+                        <option>Action</option>
+                        <option selected>Adventure</option>
+                        <option selected>Sci-Fi</option>
+                        <option>Drama</option>
+                        <option>Comedy</option>
+                        <option selected>Fantasy</option>
+                        <option>Thriller</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="favorite-actors">Favorite Actors</label>
+                    <input type="text" id="favorite-actors" value="Tom Hanks, Scarlett Johansson, Idris Elba">
+                </div>
+                <div class="form-group">
+                    <label for="rating-preference">Minimum Rating</label>
+                    <select id="rating-preference">
+                        <option>6.0</option>
+                        <option selected>7.0</option>
+                        <option>8.0</option>
+                        <option>9.0</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="decade-preference">Preferred Decades</label>
+                    <select id="decade-preference" multiple>
+                        <option>1980s</option>
+                        <option>1990s</option>
+                        <option selected>2000s</option>
+                        <option selected>2010s</option>
+                        <option selected>2020s</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="update-btn">Update Preferences</button>
+                </div>
+            </form>
+        </section>
+        
+        <!-- Movie Categories -->
+        <div class="section-header">
+            <h2 class="section-title">Browse by Category</h2>
+        </div>
+        <div class="categories">
+            <div class="category active">All Recommendations</div>
+            <div class="category">Action & Adventure</div>
+            <div class="category">Comedy</div>
+            <div class="category">Drama</div>
+            <div class="category">Sci-Fi & Fantasy</div>
+            <div class="category">Thriller</div>
+            <div class="category">Romance</div>
+            <div class="category">Horror</div>
+            <div class="category">Documentary</div>
+        </div>
+        
+        <!-- Recommended Movies -->
+        <div class="section-header">
+            <h2 class="section-title">Recommended For You</h2>
+            <a href="#" style="color: #e50914; text-decoration: none;">See all →</a>
+        </div>
+        <div class="movies-grid">
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1536440136628-6b605c6429db?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Eternal Horizon</h3>
+                    <div class="movie-year">2023</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>8.5</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1542204165-65bf26472b9b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Shadow Protocol</h3>
+                    <div class="movie-year">2022</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>7.9</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1511814087643-3230534d71d9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Quantum Paradox</h3>
+                    <div class="movie-year">2023</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>8.2</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1540497077202-7c8a3963c72a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Midnight Voyage</h3>
+                    <div class="movie-year">2023</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>8.7</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1551120954-893057788167?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Neon City</h3>
+                    <div class="movie-year">2022</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>7.6</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1545113401-54165865c0bb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Solar Eclipse</h3>
+                    <div class="movie-year">2023</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>8.1</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1544717137-7236dd30b750?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Iron Frontier</h3>
+                    <div class="movie-year">2021</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>7.8</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1529117350683-862769668163?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Cosmic Drift</h3>
+                    <div class="movie-year">2023</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>8.4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- More Sections -->
+        <div class="section-header">
+            <h2 class="section-title">Trending Now</h2>
+            <a href="#" style="color: #e50914; text-decoration: none;">See all →</a>
+        </div>
+        <div class="movies-grid">
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1518135714426-920a8d74a648?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Apocalypse Dawn</h3>
+                    <div class="movie-year">2023</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>8.9</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1518895312237-9a214092a2b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Silent Witness</h3>
+                    <div class="movie-year">2022</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>7.7</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1553343305-96d3e5e53760?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Desert Mirage</h3>
+                    <div class="movie-year">2023</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>8.0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1517048676770-aabdfeee3cc9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Frozen Legacy</h3>
+                    <div class="movie-year">2021</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>7.5</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1515859046601-566890057a0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Digital Frontier</h3>
+                    <div class="movie-year">2023</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>8.6</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1518895312237-9a214092a2b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Midnight Heist</h3>
+                    <div class="movie-year">2022</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>7.9</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1517130038641-a774d04afb3c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Eternal Flame</h3>
+                    <div class="movie-year">2023</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>8.3</span>
+                    </div>
+                </div>
+            </div>
+            <div class="movie-card">
+                <img src="https://images.unsplash.com/photo-1553343305-96d3e5e53760?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" alt="Movie" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">Quantum Shift</h3>
+                    <div class="movie-year">2022</div>
+                    <div class="movie-rating">
+                        <span class="rating-star">⭐</span>
+                        <span>7.4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="logo">Movie<span>Reel</span></div>
+            <div class="footer-links">
+                <a href="#">Terms & Conditions</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Help Center</a>
+                <a href="#">Contact Us</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+```
+
